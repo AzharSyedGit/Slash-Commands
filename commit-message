@@ -1,0 +1,214 @@
+# /commit-message
+
+Generate a **Conventional Commit message for an iOS (Swift) project** using the
+current staged git changes and branch name. The commit message should follow
+best practices and include the Jira issue ID when available.
+
+---
+
+## Instructions
+
+When this command is triggered:
+
+### 1. Inspect Git Context
+
+Run the following commands to understand the change.
+
+```bash
+git branch --show-current
+```
+
+```bash
+git diff --staged --stat
+```
+
+```bash
+git diff --staged
+```
+
+```bash
+git log --oneline -10
+```
+
+Use these to determine:
+
+- What files changed
+- What part of the app is affected
+- Existing commit message style
+
+---
+
+### 2. Detect Jira Issue ID
+
+Extract Jira ID from the branch name using the pattern:
+
+```
+[A-Z]+-[0-9]+
+```
+
+Example branch names:
+
+```
+feat/IOS-19839-course-player
+fix/IOS-19838-webview-crash
+tasl/IOS-19830-video-player-fix
+```
+
+Detected IDs:
+
+```
+IOS-19839
+IOS-19838
+IOS-19830
+```
+
+If none is found, ask the user for the Jira ID.
+
+---
+
+### 3. Determine Commit Type
+
+Choose the correct Conventional Commit type.
+
+| Type | When to use |
+|-----|-------------|
+| feat | New feature |
+| fix | Bug fix |
+| perf | Performance improvement |
+| refactor | Code restructuring |
+| docs | Documentation |
+| style | Formatting only |
+| test | Tests only |
+| chore | Maintenance tasks |
+| build | Build or dependency changes |
+| ci | CI/CD changes |
+
+---
+
+### 4. Determine Scope (iOS)
+
+Infer the scope from changed files.
+
+Common scopes for iOS projects:
+
+| Scope | Area |
+|------|------|
+| ui | SwiftUI / UIKit UI |
+| webview | WKWebView logic |
+| network | API layer |
+| auth | Authentication |
+| analytics | Event tracking |
+| player | Video / media player |
+| storage | CoreData / persistence |
+| course | LMS / course logic |
+| build | Xcode build settings |
+
+Example:
+
+```
+fix(webview)
+feat(ui)
+refactor(network)
+```
+
+---
+
+### 5. Generate the Commit Message
+
+Use this format:
+
+```
+type(scope): short description
+
+Optional longer explanation describing what and why.
+
+Jira: ISSUE-ID
+```
+
+Rules:
+
+- Subject line ≤ 72 characters
+- Use imperative mood
+- Do not end subject with a period
+- Wrap body text at 72 characters
+
+---
+
+## Example Outputs
+
+### Bug Fix
+
+```
+fix(webview): handle iframe postMessage crash on iPhone
+
+Adds validation before processing iframe messages coming from
+course content. Prevents crash observed in WKWebView on iPhone.
+
+Jira: LMS-341
+```
+
+---
+
+### Feature
+
+```
+feat(ui): implement adaptive dashboard card layout
+
+Adds layout logic to support dynamic card counts from 1 to 5.
+Cards resize and adjust rows automatically.
+
+Jira: APP-512
+```
+
+---
+
+### Refactor
+
+```
+refactor(network): simplify API error handling
+
+Centralizes response error parsing inside NetworkManager and
+removes duplicated logic across service layers.
+
+Jira: APP-402
+```
+
+---
+
+### Build Update
+
+```
+chore(build): update iOS deployment target to 16.0
+```
+
+---
+
+## Additional Guidelines
+
+Avoid vague commit messages:
+
+❌
+
+```
+fix bug
+update code
+changes
+```
+
+Prefer descriptive messages:
+
+✅
+
+```
+fix(webview): prevent crash when iframe sends empty message
+```
+
+---
+
+## Output
+
+Return **only the generated commit message**, ready to paste into:
+
+```
+git commit -m "<message>"
+```

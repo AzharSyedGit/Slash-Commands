@@ -1,5 +1,5 @@
 ---
-name: xcode-mcp
+name: xcode-build-test
 description: >
   Build, test, simulator, project-edit, and verification workflows for Xcode
   driven exclusively through MCP servers (xcode-mcp / xcode-native-mcp) instead
@@ -304,6 +304,42 @@ category table, preserving the `available for Xcode 27` tag.
 
 ## Troubleshooting
 
+### MCP servers not installed
+
+If `xcode-mcp` or `xcode-native-mcp` is missing entirely (not just disconnected),
+add it to the MCP client's config file under `mcpServers`. Most clients support a
+workspace-level and a user-level config; add the server to whichever scope you
+want it available in. Add only the server that is missing. Keep `autoApprove`
+empty so each tool prompts for approval; opt into specific tools later.
+
+```json
+{
+  "mcpServers": {
+    "xcode-native-mcp": {
+      "command": "xcrun",
+      "args": ["mcpbridge"],
+      "autoApprove": []
+    },
+    "xcode-mcp": {
+      "command": "npx",
+      "args": ["-y", "xcodebuildmcp@latest", "mcp"],
+      "env": {
+        "XCODEBUILDMCP_SENTRY_DISABLED": "true"
+      },
+      "autoApprove": []
+    }
+  }
+}
+```
+
+Notes:
+- `xcode-native-mcp` runs via `xcrun mcpbridge` (Apple's built-in bridge), so it
+  also requires the Xcode Tools toggle below.
+- `xcode-mcp` (xcodebuildmcp) is fetched via `npx`; adjust the `npx` path if it is
+  not at `/usr/local/bin/npx`.
+- After editing the config, reconnect the servers from the MCP Server view (or
+  restart the client).
+
 ### `xcode-native-mcp` not connected
 
 Direct the user to enable Xcode's built-in MCP server:
@@ -334,8 +370,8 @@ control Xcode, so it can't enumerate any tools. To fix:
 1. When the macOS pop-up appears, click **Allow** (it does not always persist, so
    the steps below make it stick).
 2. Open **System Settings > Privacy & Security > Automation**.
-3. Find the MCP client app (e.g., Kiro / Cursor / the host editor) and ensure its
-   toggle for **Xcode** is enabled.
+3. Find the MCP client app in the list and ensure its toggle for **Xcode** is
+   enabled.
 4. If it keeps reprompting or still shows zero tools, fully quit and relaunch both
    the client and Xcode, then reconnect the MCP server.
 5. As a last resort, reset the Automation permission, then re-grant on next
